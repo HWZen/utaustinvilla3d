@@ -2,7 +2,8 @@
 #include "../kalman/BallKF.h"
 #include "../kalman/PlayerKF.h"
 
-WorldModel::WorldModel() {
+WorldModel::WorldModel()
+{
 
     cycle = 0;
     scoreLeft = -1;
@@ -13,31 +14,33 @@ WorldModel::WorldModel() {
     lastPlayMode = PM_GAME_OVER;
     lastDifferentPlayMode = PM_GAME_OVER;
 
-    uNum = 1;//dummy
+    passBalls.resize(TEAMMATE_NUM);
+
+    uNum = 1; //dummy
     uNumSet = false;
 
-    side = SIDE_LEFT;//dummy
+    side = SIDE_LEFT; //dummy
     sideSet = false;
 
-    lastSkills.push_back( SKILL_STAND ) ;//dummy
-    lastSkills.push_back( SKILL_STAND ) ;//dummy
+    lastSkills.push_back(SKILL_STAND); //dummy
+    lastSkills.push_back(SKILL_STAND); //dummy
 
-    lastOdometryPos = SIM::Point2D(0,0);
+    lastOdometryPos = SIM::Point2D(0, 0);
     lastOdometryAngDeg = 0;
 
-    for (int i = 0; i < NUM_WORLD_OBJS; ++i) {
-        WorldObject& obj = worldObjects[i];
+    for (int i = 0; i < NUM_WORLD_OBJS; ++i)
+    {
+        WorldObject &obj = worldObjects[i];
         obj.id = i;
     }
 
     fLocalized = false;
     fFallen = false;
 
-
     // TODO: this is not correct, but anyway localization should update it
     // Is there a better solution for init them?
-    myPosition.setVecPosition( 0, 0, 0 );
-    myLastPosition.setVecPosition( 0, 0, 0 );
+    myPosition.setVecPosition(0, 0, 0);
+    myLastPosition.setVecPosition(0, 0, 0);
     myAngDegrees = 0;
 
 #ifdef GROUND_TRUTH_SERVER
@@ -48,8 +51,8 @@ WorldModel::WorldModel() {
 
     lastBallSightingTime = -100;
 
-    lastBallSeenPosition = vector<VecPosition>(3,VecPosition(0,0,0));
-    lastBallSeenTime = vector<double>(3,0);
+    lastBallSeenPosition = vector<VecPosition>(3, VecPosition(0, 0, 0));
+    lastBallSeenTime = vector<double>(3, 0);
 
     lastLineSightingTime = -100;
 
@@ -58,7 +61,8 @@ WorldModel::WorldModel() {
 
     fallenTeammate = vector<bool>(NUM_AGENTS);
     fallenOpponent = vector<bool>(NUM_AGENTS);
-    for (int i = 0; i < NUM_AGENTS; i++) {
+    for (int i = 0; i < NUM_AGENTS; i++)
+    {
         fallenTeammate[i] = false;
         fallenOpponent[i] = false;
     }
@@ -80,12 +84,14 @@ WorldModel::WorldModel() {
     ballKalmanFilter = new BallKF(this);
     opponentKalmanFilters = new PlayerKF(this);
 
-    for (unsigned int i = 0; i < NUM_AGENTS; i++) {
+    for (unsigned int i = 0; i < NUM_AGENTS; i++)
+    {
         setTeammateLastHeardTime(i, -1);
     }
 }
 
-WorldModel::~WorldModel() {
+WorldModel::~WorldModel()
+{
     if (rvsend != NULL)
         delete rvsend;
 
@@ -93,7 +99,8 @@ WorldModel::~WorldModel() {
     delete opponentKalmanFilters;
 }
 
-void WorldModel::display() {
+void WorldModel::display()
+{
 
     cout << "****************World Model******************************\n";
     std::cout << "Cycle: " << cycle << "\n";
@@ -106,11 +113,12 @@ void WorldModel::display() {
     std::cout << "uNumSet: " << uNumSet << ", uNum: " << uNum << "\n";
     std::cout << "sideSet: " << sideSet << ", side: " << side << "\n";
 
-    for (int i = WO_BALL; i < NUM_WORLD_OBJS; ++i) {
-        WorldObject& obj = worldObjects[i];
+    for (int i = WO_BALL; i < NUM_WORLD_OBJS; ++i)
+    {
+        WorldObject &obj = worldObjects[i];
         cout << "World Object: " << WorldObjType2Str[i] << ":\n"
              << obj.pos << '\n'
-             << " currently seen: " << ( obj.currentlySeen ? "YES" : "NO" ) << '\n'
+             << " currently seen: " << (obj.currentlySeen ? "YES" : "NO") << '\n'
              << " cycle last seen: " << obj.cycleLastSeen
              << " time last seen: " << obj.timeLastSeen << endl;
     }
@@ -118,75 +126,77 @@ void WorldModel::display() {
     cout << "*********************************************************\n";
 }
 
-void WorldModel::updateGoalPostsAndFlags() {
+void WorldModel::updateGoalPostsAndFlags()
+{
 
     VecPosition fieldXPlusYPlus, fieldXPlusYMinus, fieldXMinusYPlus, fieldXMinusYMinus;
-    if(side == SIDE_LEFT) {
+    if (side == SIDE_LEFT)
+    {
         // flags
-        worldObjects[FLAG_1_R].pos.setVecPosition( HALF_FIELD_X,
-                HALF_FIELD_Y,
-                0 );
-        worldObjects[FLAG_2_R].pos.setVecPosition(  HALF_FIELD_X,
-                -HALF_FIELD_Y,
-                0 );
-        worldObjects[FLAG_1_L].pos.setVecPosition( -HALF_FIELD_X,
-                HALF_FIELD_Y,
-                0 );
-        worldObjects[FLAG_2_L].pos.setVecPosition( -HALF_FIELD_X,
-                -HALF_FIELD_Y,
-                0 );
+        worldObjects[FLAG_1_R].pos.setVecPosition(HALF_FIELD_X,
+                                                  HALF_FIELD_Y,
+                                                  0);
+        worldObjects[FLAG_2_R].pos.setVecPosition(HALF_FIELD_X,
+                                                  -HALF_FIELD_Y,
+                                                  0);
+        worldObjects[FLAG_1_L].pos.setVecPosition(-HALF_FIELD_X,
+                                                  HALF_FIELD_Y,
+                                                  0);
+        worldObjects[FLAG_2_L].pos.setVecPosition(-HALF_FIELD_X,
+                                                  -HALF_FIELD_Y,
+                                                  0);
         // goalposts
-        worldObjects[GOALPOST_1_R].pos.setVecPosition( HALF_FIELD_X,
-                HALF_GOAL_Y,
-                GOAL_Z);
-        worldObjects[GOALPOST_2_R].pos.setVecPosition(  HALF_FIELD_X,
-                -HALF_GOAL_Y,
-                GOAL_Z);
-        worldObjects[GOALPOST_1_L].pos.setVecPosition( -HALF_FIELD_X,
-                HALF_GOAL_Y,
-                GOAL_Z);
-        worldObjects[GOALPOST_2_L].pos.setVecPosition( -HALF_FIELD_X,
-                -HALF_GOAL_Y,
-                GOAL_Z);
-
+        worldObjects[GOALPOST_1_R].pos.setVecPosition(HALF_FIELD_X,
+                                                      HALF_GOAL_Y,
+                                                      GOAL_Z);
+        worldObjects[GOALPOST_2_R].pos.setVecPosition(HALF_FIELD_X,
+                                                      -HALF_GOAL_Y,
+                                                      GOAL_Z);
+        worldObjects[GOALPOST_1_L].pos.setVecPosition(-HALF_FIELD_X,
+                                                      HALF_GOAL_Y,
+                                                      GOAL_Z);
+        worldObjects[GOALPOST_2_L].pos.setVecPosition(-HALF_FIELD_X,
+                                                      -HALF_GOAL_Y,
+                                                      GOAL_Z);
     }
-    else { //side == SIDE_RIGHT
+    else
+    { //side == SIDE_RIGHT
         // flags
-        worldObjects[FLAG_1_R].pos.setVecPosition( -HALF_FIELD_X,
-                -HALF_FIELD_Y,
-                0 );
-        worldObjects[FLAG_2_R].pos.setVecPosition( -HALF_FIELD_X,
-                HALF_FIELD_Y,
-                0 );
-        worldObjects[FLAG_1_L].pos.setVecPosition(  HALF_FIELD_X,
-                -HALF_FIELD_Y,
-                0 );
-        worldObjects[FLAG_2_L].pos.setVecPosition( HALF_FIELD_X,
-                HALF_FIELD_Y,
-                0 );
+        worldObjects[FLAG_1_R].pos.setVecPosition(-HALF_FIELD_X,
+                                                  -HALF_FIELD_Y,
+                                                  0);
+        worldObjects[FLAG_2_R].pos.setVecPosition(-HALF_FIELD_X,
+                                                  HALF_FIELD_Y,
+                                                  0);
+        worldObjects[FLAG_1_L].pos.setVecPosition(HALF_FIELD_X,
+                                                  -HALF_FIELD_Y,
+                                                  0);
+        worldObjects[FLAG_2_L].pos.setVecPosition(HALF_FIELD_X,
+                                                  HALF_FIELD_Y,
+                                                  0);
         // goal posts
-        worldObjects[GOALPOST_1_R].pos.setVecPosition( -HALF_FIELD_X,
-                -HALF_GOAL_Y,
-                GOAL_Z );
-        worldObjects[GOALPOST_2_R].pos.setVecPosition( -HALF_FIELD_X,
-                HALF_GOAL_Y,
-                GOAL_Z);
-        worldObjects[GOALPOST_1_L].pos.setVecPosition(  HALF_FIELD_X,
-                -HALF_GOAL_Y,
-                GOAL_Z );
-        worldObjects[GOALPOST_2_L].pos.setVecPosition( HALF_FIELD_X,
-                HALF_GOAL_Y,
-                GOAL_Z );
+        worldObjects[GOALPOST_1_R].pos.setVecPosition(-HALF_FIELD_X,
+                                                      -HALF_GOAL_Y,
+                                                      GOAL_Z);
+        worldObjects[GOALPOST_2_R].pos.setVecPosition(-HALF_FIELD_X,
+                                                      HALF_GOAL_Y,
+                                                      GOAL_Z);
+        worldObjects[GOALPOST_1_L].pos.setVecPosition(HALF_FIELD_X,
+                                                      -HALF_GOAL_Y,
+                                                      GOAL_Z);
+        worldObjects[GOALPOST_2_L].pos.setVecPosition(HALF_FIELD_X,
+                                                      HALF_GOAL_Y,
+                                                      GOAL_Z);
     }
-
 }
 
 // Updates the l2g and g2l matrices based on 4 points of the field
 void WorldModel::
-updateMatricesAndMovingObjs( VecPosition& fieldXPlusYPlus,
-                             VecPosition& fieldXPlusYMinus,
-                             VecPosition& fieldXMinusYPlus,
-                             VecPosition& fieldXMinusYMinus ) {
+    updateMatricesAndMovingObjs(VecPosition &fieldXPlusYPlus,
+                                VecPosition &fieldXPlusYMinus,
+                                VecPosition &fieldXMinusYPlus,
+                                VecPosition &fieldXMinusYMinus)
+{
 
     VecPosition localFieldCentre = (fieldXPlusYPlus + fieldXMinusYMinus) * 0.5;
     VecPosition localFieldXDirection = (fieldXPlusYPlus - fieldXMinusYPlus).normalize();
@@ -212,7 +222,6 @@ updateMatricesAndMovingObjs( VecPosition& fieldXPlusYPlus,
     setLocalToGlobal(3, 1, 0);
     setLocalToGlobal(3, 2, 0);
     setLocalToGlobal(3, 3, 1.0);
-
 
     VecPosition localBodyCentre = VecPosition(0, 0, 0);
     VecPosition localBodyXDirection = VecPosition(1.0, 0, 0);
@@ -245,32 +254,36 @@ updateMatricesAndMovingObjs( VecPosition& fieldXPlusYPlus,
     setGlobalToLocal(3, 3, 1.0);
 
     // Set coordinates for moving objects
-    for( int i = WO_BALL; i <= WO_OPPONENT_FOOT_R11; ++i ) {
+    for (int i = WO_BALL; i <= WO_OPPONENT_FOOT_R11; ++i)
+    {
 
-        WorldObject* pObj = getWorldObject(i);
+        WorldObject *pObj = getWorldObject(i);
 
-        if( pObj->currentlySeen ) {
-
+        if (pObj->currentlySeen)
+        {
 
             VecPosition objLocalOrigin = pObj->vision.polar.getCartesianFromPolar();
-            VecPosition objGlobal = l2g( objLocalOrigin );
+            VecPosition objGlobal = l2g(objLocalOrigin);
 
-            if( pObj->id == WO_BALL ) {
+            if (pObj->id == WO_BALL)
+            {
 
-                setBall( objGlobal );
-
-            } else if( WO_OPPONENT1 <= pObj->id && pObj->id <= WO_OPPONENT11 ) {
-
-                setOpponent( pObj->id, objGlobal );
-
-            } else if( WO_TEAMMATE1 <= pObj->id && pObj->id <= WO_TEAMMATE11 ) {
-
-                setTeammate( pObj->id, objGlobal );
-
-            } else if( WO_TEAMMATE_HEAD1 <= pObj->id && pObj->id <= WO_OPPONENT_FOOT_R11 ) {
-                setObjectPosition( pObj->id, objGlobal );
+                setBall(objGlobal);
             }
+            else if (WO_OPPONENT1 <= pObj->id && pObj->id <= WO_OPPONENT11)
+            {
 
+                setOpponent(pObj->id, objGlobal);
+            }
+            else if (WO_TEAMMATE1 <= pObj->id && pObj->id <= WO_TEAMMATE11)
+            {
+
+                setTeammate(pObj->id, objGlobal);
+            }
+            else if (WO_TEAMMATE_HEAD1 <= pObj->id && pObj->id <= WO_OPPONENT_FOOT_R11)
+            {
+                setObjectPosition(pObj->id, objGlobal);
+            }
         }
     }
 }

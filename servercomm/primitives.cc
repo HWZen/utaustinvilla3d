@@ -4,8 +4,10 @@
 
 extern int agentBodyType;
 
-static Effectors UTWalkJointToSimEffectors(const Joint j) {
-    switch (j) {
+static Effectors UTWalkJointToSimEffectors(const Joint j)
+{
+    switch (j)
+    {
     case HeadYaw:
         return EFF_H1;
     case HeadPitch:
@@ -60,16 +62,22 @@ static Effectors UTWalkJointToSimEffectors(const Joint j) {
     }
 }
 
-string NaoBehavior::composeAction() {
+string NaoBehavior::composeAction()
+{
 
     stringstream ss("");
 
-    if (bodyModel->useOmniWalk()) {
+    double passX = passPosition.getX();
+    double passY = passPosition.getY();
+
+    if (bodyModel->useOmniWalk())
+    {
 
         // First two joints are head joints which we want to control ourself
-        for (int i=2; i < EFF_NUM; i++) {
+        for (int i = 2; i < EFF_NUM; i++)
+        {
             // i is the UTWalk joint, and then mapped to our joint using JointToUTWalkEffectors
-            bodyModel->setTargetAngle(UTWalkJointToSimEffectors(Joint(i)), RAD_T_DEG*raw_joint_commands_->angles_[i]);
+            bodyModel->setTargetAngle(UTWalkJointToSimEffectors(Joint(i)), RAD_T_DEG * raw_joint_commands_->angles_[i]);
         }
 
         // Always use our computeTorque() for the head
@@ -94,7 +102,8 @@ string NaoBehavior::composeAction() {
         ss << "(lle4 " << bodyModel->computeTorque(UTWalkJointToSimEffectors(LKneePitch), sim_effectors_, raw_joint_angles_, raw_joint_commands_) << ")";
         ss << "(lle5 " << bodyModel->computeTorque(UTWalkJointToSimEffectors(LAnklePitch), sim_effectors_, raw_joint_angles_, raw_joint_commands_) << ")";
         ss << "(lle6 " << bodyModel->computeTorque(UTWalkJointToSimEffectors(LAnkleRoll), sim_effectors_, raw_joint_angles_, raw_joint_commands_) << ")";
-        if (bodyModel->hasToe()) {
+        if (bodyModel->hasToe())
+        {
             ss << "(lle7 " << bodyModel->computeTorque(UTWalkJointToSimEffectors(LToePitch), sim_effectors_, raw_joint_angles_, raw_joint_commands_) << ")";
         }
 
@@ -104,11 +113,13 @@ string NaoBehavior::composeAction() {
         ss << "(rle4 " << bodyModel->computeTorque(UTWalkJointToSimEffectors(RKneePitch), sim_effectors_, raw_joint_angles_, raw_joint_commands_) << ")";
         ss << "(rle5 " << bodyModel->computeTorque(UTWalkJointToSimEffectors(RAnklePitch), sim_effectors_, raw_joint_angles_, raw_joint_commands_) << ")";
         ss << "(rle6 " << bodyModel->computeTorque(UTWalkJointToSimEffectors(RAnkleRoll), sim_effectors_, raw_joint_angles_, raw_joint_commands_) << ")";
-        if (bodyModel->hasToe()) {
+        if (bodyModel->hasToe())
+        {
             ss << "(rle7 " << bodyModel->computeTorque(UTWalkJointToSimEffectors(RToePitch), sim_effectors_, raw_joint_angles_, raw_joint_commands_) << ")";
         }
-
-    } else {
+    }
+    else
+    {
         ss << "(he1 " << bodyModel->computeTorque(EFF_H1) << ")";
         ss << "(he2 " << bodyModel->computeTorque(EFF_H2) << ")";
 
@@ -128,7 +139,8 @@ string NaoBehavior::composeAction() {
         ss << "(lle4 " << bodyModel->computeTorque(EFF_LL4) << ")";
         ss << "(lle5 " << bodyModel->computeTorque(EFF_LL5) << ")";
         ss << "(lle6 " << bodyModel->computeTorque(EFF_LL6) << ")";
-        if (bodyModel->hasToe()) {
+        if (bodyModel->hasToe())
+        {
             ss << "(lle7 " << bodyModel->computeTorque(EFF_LL7) << ")";
         }
 
@@ -138,12 +150,11 @@ string NaoBehavior::composeAction() {
         ss << "(rle4 " << bodyModel->computeTorque(EFF_RL4) << ")";
         ss << "(rle5 " << bodyModel->computeTorque(EFF_RL5) << ")";
         ss << "(rle6 " << bodyModel->computeTorque(EFF_RL6) << ")";
-        if (bodyModel->hasToe()) {
+        if (bodyModel->hasToe())
+        {
             ss << "(rle7 " << bodyModel->computeTorque(EFF_RL7) << ")";
         }
-
     }
-
 
     // Create say message
     double time = worldModel->getTime();
@@ -151,16 +162,18 @@ string NaoBehavior::composeAction() {
     VecPosition ball = worldModel->getLastBallSeenPosition()[0];
     double ballX = ball.getX();
     double ballY = ball.getY();
-    double myX = worldModel->l2g(VecPosition(0,0,0)).getX();
-    double myY = worldModel->l2g(VecPosition(0,0,0)).getY();
+    double myX = worldModel->l2g(VecPosition(0, 0, 0)).getX();
+    double myY = worldModel->l2g(VecPosition(0, 0, 0)).getY();
     bool seeingBall = worldModel->getWorldObject(WO_BALL)->currentlySeen;
     double timeBallLastSeen = worldModel->getLastBallSeenTime()[0];
     bool canTrust = worldModel->canTrustVision();
     int uNum = worldModel->getUNum();
 
     string message;
-    if (canTrust || fallen) {
-        if(makeSayMessage(uNum, time, timeBallLastSeen, ballX, ballY, myX, myY, fallen, message)) {
+    if (canTrust || fallen)
+    {
+        if (makeSayMessage(uNum, time, timeBallLastSeen, ballX, ballY, myX, myY, fallen, message,passX,passY))
+        {
             ss << message;
             /*
             cout << "Data Sent:\n";

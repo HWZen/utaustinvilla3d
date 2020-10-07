@@ -21,6 +21,7 @@
 
 using namespace std;
 
+
 // TODO: Temporary home. Not sure if this this the best place to put this.
 struct WalkVelocity
 {
@@ -237,6 +238,8 @@ public:
 
     NaoBehavior(const std::string teamName, int uNum, const map<string, string>& namedParams_, const string& rsg_);
     virtual ~NaoBehavior();
+
+    VecPosition passPosition; //假设为约定的传球位置
 
     virtual std::string Init();
     virtual std::string Think(const std::string& message);
