@@ -20,7 +20,6 @@ extern int agentBodyType;
  * namedParams_ are a mapping between parameters and their values
  */
 
-
 NaoBehavior::
     NaoBehavior(const std::string teamName, int uNum, const map<string, string> &namedParams_, const string &rsg_) : namedParams(namedParams_),
                                                                                                                      rsg(rsg_)
@@ -92,9 +91,16 @@ NaoBehavior::
         readSkillsFromFile("./skills/stand.skl");
         readSkillsFromFile("./skills/kick.skl");
 
+        //
+
         // ik skills
         readSkillsFromFile("./skills/kick_ik_0.skl");
         // end ik skills
+
+        //  bk skills
+        readSkillsFromFile("./skills/skill_bk.skl");
+
+        // bk skills end
     }
     catch (std::string &what)
     {

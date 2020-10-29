@@ -3,7 +3,7 @@
 // This file contains mapping between enums to strings, to
 // be used by the parser (mainly) when reading from file
 
-template<>
+template <>
 EnumParser<BodyParts>::EnumParser()
 {
     string2enum["TORSO"] = TORSO;
@@ -37,12 +37,12 @@ EnumParser<BodyParts>::EnumParser()
     enum2String[TOE_RIGHT] = "TOE_RIGHT";
 }
 template class EnumParser<BodyParts>;
-template<>
+template <>
 const EnumParser<BodyParts> EnumParser<BodyParts>::parser = EnumParser<BodyParts>();
 
 //EnumParser<BodyParts> a = EnumParser<BodyParts>::parser;
 
-template<>
+template <>
 EnumParser<SkillType>::EnumParser()
 {
     string2enum["SKILL_WALK_OMNI"] = SKILL_WALK_OMNI;
@@ -57,28 +57,26 @@ EnumParser<SkillType>::EnumParser()
     string2enum["SKILL_KICK_RIGHT_LEG"] = SKILL_KICK_RIGHT_LEG;
     enum2String[SKILL_KICK_RIGHT_LEG] = "SKILL_KICK_RIGHT_LEG";
 
-
-
-// INVERSE KINEMATICS KICKS
+    // INVERSE KINEMATICS KICKS
     string2enum["SKILL_KICK_IK_0_LEFT_LEG"] = SKILL_KICK_IK_0_LEFT_LEG;
     enum2String[SKILL_KICK_IK_0_LEFT_LEG] = "SKILL_KICK_IK_0_LEFT_LEG";
 
     string2enum["SKILL_KICK_IK_0_RIGHT_LEG"] = SKILL_KICK_IK_0_RIGHT_LEG;
     enum2String[SKILL_KICK_IK_0_RIGHT_LEG] = "SKILL_KICK_IK_0_RIGHT_LEG";
 
+    string2enum["SKILL_BK"] = SKILL_BK;
+    enum2String[SKILL_BK] = "SKILL_BK";
 
-// END INVERSE KINEMATICS KICKS
-
+    // END INVERSE KINEMATICS KICKS
 
     string2enum["SKILL_NONE"] = SKILL_NONE;
     enum2String[SKILL_NONE] = "SKILL_NONE";
-
 }
 template class EnumParser<SkillType>;
-template<>
+template <>
 const EnumParser<SkillType> EnumParser<SkillType>::parser = EnumParser<SkillType>();
 
-template<>
+template <>
 EnumParser<Effectors>::EnumParser()
 {
     string2enum["EFF_H1"] = EFF_H1;
@@ -152,20 +150,18 @@ EnumParser<Effectors>::EnumParser()
 
     string2enum["EFF_RL7"] = EFF_RL7;
     enum2String[EFF_RL7] = "EFF_RL7";
-
 }
 template class EnumParser<Effectors>;
-template<>
+template <>
 const EnumParser<Effectors> EnumParser<Effectors>::parser = EnumParser<Effectors>();
 bool isKickSkill(SkillType skill)
 {
-    string skillStr = EnumParser<SkillType>::getStringFromEnum( skill );
+    string skillStr = EnumParser<SkillType>::getStringFromEnum(skill);
     return skillStr.find("KICK") != string::npos;
 }
 
 bool isKickIKSkill(SkillType skill)
 {
-    string skillStr = EnumParser<SkillType>::getStringFromEnum( skill );
+    string skillStr = EnumParser<SkillType>::getStringFromEnum(skill);
     return skillStr.find("KICK_IK") != string::npos;
 }
-
