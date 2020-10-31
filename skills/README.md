@@ -5,6 +5,15 @@ Files for defining skills represented as a series of fixed frame poses.  Skill f
 
 To add a new skill to an agent the skill's skill file should be loaded in by calling `readSkillsFromFile()` in `NaoBehavior::NaoBehavior()`.  The skill should also be added to `enum SkillType` in [headers/headers.h](../headers/headers.h) and to `EnumParser<SkillType>` in [headers/headers.cc](../headers/headers.cc). 
 
+添加技能方法：
+1. 修改 `enum SkillType` in [headers/headers.h](../headers/headers.h)
+2. 添加 `Kick Parameters`  in [headers/headers.h](../headers/headers.h)
+3. 修改  `EnumParser<SkillType>` in [headers/headers.cc](../headers/headers.cc). 
+4. 修改 `getStdNameParameter` in [behaviors/kicking.cc](../behaviors/kicking.cc). 
+5. 修改 `getSkillsForKickType` in [behaviors/kicking.cc](../behaviors/kicking.cc). 
+6. 添加 `readSkillsFromFile( " ")` 在92行 in  [behaviors/naobehavior.cc](../behaviors/naobehavior.cc). 
+7. 
+
 Skill files are in the following format:
 
 ##### Begin and name skill

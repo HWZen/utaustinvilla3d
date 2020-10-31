@@ -285,7 +285,8 @@ enum SkillType
 
     SKILL_NONE,
 
-    SKILL_BK
+    SKILL_BK_L,
+    SKILL_BK_R
 
 };
 

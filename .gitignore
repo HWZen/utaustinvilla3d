@@ -8,3 +8,8 @@ agentspark
 libs/*.so*
 .vs
 .vscode/
+
+*.pdb
+*.ilk
+*.exe
+*.obj

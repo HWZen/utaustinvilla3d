@@ -381,7 +381,8 @@ double NaoBehavior::getStdNameParameter(const SkillType kick_skill, const string
     case SKILL_KICK_RIGHT_LEG:
         prefix = "kick_";
         break;
-    case SKILL_BK:
+    case SKILL_BK_L:
+    case SKILL_BK_R:
         prefix = "kick_bk";
         break;
     default:
@@ -400,7 +401,8 @@ void NaoBehavior::getSkillsForKickType(int kickType, SkillType skills[])
         skills[1] = SKILL_KICK_IK_0_RIGHT_LEG;
         break;
     case kick_BK:
-        skills[0] = SKILL_BK;
+        skills[0] = SKILL_BK_L;
+        skills[1] = SKILL_BK_R;
     case KICK_FORWARD:
     default:
         skills[0] = SKILL_KICK_LEFT_LEG;
